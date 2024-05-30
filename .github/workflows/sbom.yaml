@@ -1,0 +1,34 @@
+name: SBOM Generation
+
+permissions:
+  id-token: write
+  contents: read
+
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+
+jobs:
+  generate_sbom:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Generate SBOM
+      uses: anchore/sbom-action@v0.15.11
+      with:
+        path: '.'
+        format: spdx-json
+        output-file: ${{ github.event.repository.name }}-sbom.spdx.json
+    
+        
+    - name: Upload SBOM files
+      uses: actions/upload-artifact@v4
+      with:
+        name: sbom-files
+        path: |
+          ${{ github.event.repository.name }}-sbom.spdx.json
